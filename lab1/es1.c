@@ -1,78 +1,102 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <ctype.h>
+
+#define MAXS 50
+#define MAXE 25
 
 char *cercaRegexp(char *src, char *regexp);
 
 int main(){
-    int lenst, lenexp;
-    // char *stringa, *expreg;
-
-    // printf("Lunghezza stringa e lunghezza espressione regolare: ");
-    // scanf("%d %d", &lenst, &lenexp);
-    // getchar();
-    // stringa = (char *)malloc(lenst+1);
-    // expreg = (char*)malloc(lenexp+1);
-    // printf("Stringa: ");
-    // fgets(stringa, lenst+1, stdin);
-
-    // printf("Espressione regolare da cercare: ");
-    // scanf("%s", expreg);
-
-    char stringa[]="foto porto", expreg[]=".oto";
-
-    printf("%p", cercaRegexp(stringa, expreg));
-    
-    // free(stringa);
-    // free(expreg);
+    char stringa[]= "cane marino", expreg[] = "\\aane";
+    char *p= cercaRegexp(stringa, expreg);
+    if(p) printf("La prima occorrenza di '%s' inizia da %p", expreg, p);
+    else printf("Non esistono occorrenze di '%s' in '%s'", expreg, stringa);
     return 0;
 }
 
 char *cercaRegexp(char *src, char *regexp){
-    switch(*regexp){
-        case '.':
-            int c=0, flag=0;
-            regexp++;
-            while(*src != '\0'){
-                if(*src==' ') src++;
-                else if(*src == *regexp){
-                    c++,regexp++, src++;
-                    if(*regexp=='\0'){
-                        return src-c-1;
+    char *start=src, *rep=regexp;
+    while(*src != '\0'){
+        if(*src==*regexp) {
+            while(*src==*regexp){
+                src++, regexp++;
+                if(*regexp == '\0' && (*src == ' ' || *src == '\0')){
+                    return start;
+                }
+            }
+        }else{
+            switch(*regexp){
+                case '.':
+                    src++, regexp++;
+                    if(*regexp == '\0' && (*src == ' ' || *src == '\0')){
+                        return start;
                     }
-                }else{
-                    if(c==0 && !flag){
-                        src++;
-                        flag=1;
-                    }else{
-                        flag = 0;
-                        regexp-=c;
-                        c=0;
-                        while(*src!=' '){
+                    break;
+                case '[':
+                    regexp++;
+                    while(*regexp != ']'){
+                        if(*regexp == '^'){
+                            regexp++;
+                            if(*src==*regexp){
+                               while(*src!= ' ' && *src!= '\0'){
+                                    src++;
+                               }
+                               while(*regexp!=']') regexp++;
+                            }else{
+                                while(*regexp!=']'){
+                                    regexp++;
+                                    if(*src==*regexp){
+                                        while(*src!= ' ' && *src!= '\0'){
+                                                src++;
+                                        }
+                                        while(*regexp!=']') regexp++;
+                                    }
+                                }
+                                src++;
+                            }
+                            if(*regexp == '\0' && (*src == ' ' || *src == '\0')){
+                                return start;
+                            }
+                        }else if(*src!=*regexp && *regexp != ']'){
+                            regexp++;
+                        }else{
                             src++;
+                            while(*regexp != ']') regexp++;
+                            if(*regexp == '\0' && (*src == ' ' || *src == '\0')){
+                                return start;
+                            }
                         }
                     }
+                    // regexp deve finire su ]
+                    regexp++;
+                    if(*regexp == '\0' && (*src == ' ' || *src == '\0')){
+                        return start;
+                    }
+                    break;
+                case '\\':
+                    regexp++;
+                    if(isalpha(*regexp)){
+                        if(*regexp == 'a'){
+                            if(islower(*src)) regexp++, src++;
+                        }else if(*regexp == 'A'){
+                            if(isupper(*src)) regexp++, src++;
+                        }
+                    }
+                    if(*regexp == '\0' && (*src == ' ' || *src == '\0')){
+                        return start;
+                    }
+                    break;
+                default:
+                    regexp=rep;
+                    while(*src != ' ' && *src != '\0'){
+                        src++;
+                    }
+                    src++;
+                    start=src;
+                    break;
                 }
             }
-            break;
-        case '[':
-            regexp++;
-            int c=0;
-            while(*regexp!=']'){
-                c++;
-                regexp++;
-            }
-            for(int i=0; i<c; i++){
-                while(*src!='\0'){
-                     
-                }
-            }
-            break;
-        case '\\':
-            break;
-        default:
-            return NULL;
-    }
+        }
     return NULL;
 }
-
