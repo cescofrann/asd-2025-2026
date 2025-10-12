@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <string.h>
 
 #define MAXS 50
 #define MAXE 25
@@ -8,8 +9,17 @@
 char *cercaRegexp(char *src, char *regexp);
 
 int main(){
-    char stringa[]= "cane marino", expreg[] = "\\aane";
-    char *p= cercaRegexp(stringa, expreg);
+    char stringa[MAXS], expreg[MAXE];
+    char *p;
+    printf("Stringa: ");
+    fgets(stringa, MAXS, stdin);
+    stringa[strcspn(stringa, "\n")] = '\0'; //strcspn trova la prima occorrenza di '\n'
+    printf("Espressione regolare: ");
+    scanf("%s", expreg);
+    for(int i=0;i<MAXS;i++){
+        if(stringa[i]=='\n') stringa[i]='\0', i=MAXS;
+    }
+    p= cercaRegexp(stringa, expreg);
     if(p) printf("La prima occorrenza di '%s' inizia da %p", expreg, p);
     else printf("Non esistono occorrenze di '%s' in '%s'", expreg, stringa);
     return 0;
