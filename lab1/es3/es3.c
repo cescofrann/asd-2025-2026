@@ -45,7 +45,6 @@ int main(){
 }
 
 void leggi_tratta(FILE *fin, int n, corsa contenitore[]){
-    int rit;
     char cod_tr[MAXC], part[MAXP], dest[MAXA];
     data data_tratta;
     orario ora_part;
@@ -55,8 +54,7 @@ void leggi_tratta(FILE *fin, int n, corsa contenitore[]){
         fscanf(fin, "%s %s %s", cod_tr, part, dest);
         fscanf(fin, "%d/%d/%d", &data_tratta.yyyy, &data_tratta.mm, &data_tratta.dd );
         fscanf(fin, "%d:%d:%d %d:%d:%d", &ora_part.ora, &ora_part.min, &ora_part.sec, &ora_arr.ora, &ora_arr.min, &ora_arr.sec);
-        fscanf(fin, "%d", &rit);
-
+        fscanf(fin, "%d", &contenitore[i].ritardo);
 
         strcpy(contenitore[i].cod_tratta, cod_tr);
         strcpy(contenitore[i].staz_part, part);
@@ -64,7 +62,6 @@ void leggi_tratta(FILE *fin, int n, corsa contenitore[]){
         contenitore[i].data_part = data_tratta;
         contenitore[i].orario_part = ora_part;
         contenitore[i].orario_arr = ora_arr;
-        contenitore[i].ritardo = rit;
     }
 }
 
@@ -98,9 +95,7 @@ int stampa_tratte(corsa cnt[], int n, int tipo){
 
 void bubble_sort_opt_data(corsa cnt[], int n){
     int i, j, l=0, r=n-1, flag = 1;
-    corsa temp;
-    
-    corsa c1, c2;
+    corsa temp, c1, c2;
     
     for(i=l; i<r && flag==1; i++){
         flag=0;
@@ -162,7 +157,7 @@ int switch_func(int scelta, int n, corsa cnt[]){
     switch(scelta){
         case 1:
             char chr;
-            printf("File (f) o video (v): \n");
+            printf("File (f) o video (v): ");
             getchar();
             scanf("%c", &chr);
 
@@ -233,7 +228,7 @@ int switch_func(int scelta, int n, corsa cnt[]){
 
             if(tolower(c) != 'd' && tolower(c) != 'l') return -1;
             else if(tolower(c) == 'd'){
-                // Ordino il vettore per poter effettuare la ricerca dicotomica (ricorsiva)
+                // Ordino il vettore per poter effettuare la ricerca dicotomica
                 l=0, r=n-1, flag = 1;
                 for(int i=l; i<r && flag==1; i++){
                     flag=0;
