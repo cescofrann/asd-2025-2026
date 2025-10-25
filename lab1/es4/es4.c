@@ -20,11 +20,13 @@ typedef struct {
 int core(FILE *fin, int n, corsa cnt[]);
 int switch_func(int scelta, int n, corsa cnt[]);
 void leggi_tratta(FILE *fin, int n, corsa contenitore[]);
-void stampa_tratta(corsa c);
+void stampa_tratta_p(corsa *c);
 int stampa_tratte(corsa cnt[], int n, int tipo);
-void bubble_sort_opt_data(corsa cnt[], int n);
-int ric_dic_ricorsiva_cod_tr(corsa v[], int l, int r, char key[]);
-int ric_dic_ricorsiva_stz(corsa v[], int l, int r, char key[]);
+void bubble_sort_opt_data(corsa **vpp, int n);
+int ric_dic_ricorsiva_stz_p(corsa **p, int l, int r, char key[]);
+void copy_ad(corsa srcp[], corsa **p, int n);
+void stampa_tratte_p(corsa **vpp, int n);
+int ric_dic_ricorsiva_cod_tr_p(corsa **p, int l, int r, char key[]);
 
 int main(){
     FILE *fp_read;
@@ -65,17 +67,17 @@ void leggi_tratta(FILE *fin, int n, corsa contenitore[]){
     }
 }
 
-void stampa_tratta(corsa c){
-    printf("%s %s %s ", c.cod_tratta, c.staz_part, c.staz_arr);
-    printf("%d/%.2d/%.2d ", c.data_part.yyyy, c.data_part.mm, c.data_part.dd);
-    printf("%.2d:%.2d:%.2d ", c.orario_part.ora, c.orario_part.min, c.orario_part.sec);
-    printf("%.2d:%.2d:%.2d ", c.orario_arr.ora, c.orario_arr.min, c.orario_arr.sec);
-    printf("%d\n", c.ritardo);
+void stampa_tratta_p(corsa *c){
+    printf("%s %s %s ", c -> cod_tratta, c -> staz_part, c -> staz_arr);
+    printf("%d/%.2d/%.2d ", c -> data_part.yyyy, c -> data_part.mm, c -> data_part.dd);
+    printf("%.2d:%.2d:%.2d ", c -> orario_part.ora, c -> orario_part.min, c -> orario_part.sec);
+    printf("%.2d:%.2d:%.2d ", c -> orario_arr.ora, c -> orario_arr.min, c -> orario_arr.sec);
+    printf("%d\n", c -> ritardo);
 }
 
 int stampa_tratte(corsa cnt[], int n, int tipo){
     if(tipo==0)
-        for(int i=0; i<n; i++) stampa_tratta(cnt[i]);
+        for(int i=0; i<n; i++) stampa_tratta_p(cnt+i);
     else if(tipo == 1){
         FILE *fout;
         if((fout  = fopen("output.txt", "w")) == NULL){
@@ -93,67 +95,90 @@ int stampa_tratte(corsa cnt[], int n, int tipo){
     return 0;
 }
 
-void bubble_sort_opt_data(corsa cnt[], int n){
+void stampa_tratte_p(corsa **vpp, int n){
+    corsa c1;
+        for(int i=0; i<n; i++){
+            c1= **(vpp+i);
+            printf("%s %s %s ", c1.cod_tratta, c1.staz_part, c1.staz_arr);
+            printf("%d/%.2d/%.2d ", c1.data_part.yyyy, c1.data_part.mm, c1.data_part.dd);
+            printf("%.2d:%.2d:%d ", c1.orario_part.ora, c1.orario_part.min, c1.orario_part.sec);
+            printf("%.2d:%.2d:%d ", c1.orario_arr.ora, c1.orario_arr.min, c1.orario_arr.sec);
+            printf("%d\n", c1.ritardo);
+        }
+}
+
+void bubble_sort_opt_data(corsa **vpp, int n){ 
     int i, j, l=0, r=n-1, flag = 1;
-    corsa temp, c1, c2;
+    corsa *temp, c1, c2;
     
     for(i=l; i<r && flag==1; i++){
         flag=0;
         for(j=l; j<r-i+l; j++){
-            c1=cnt[j];
-            c2=cnt[j+1];
+            c1 = **(vpp+j);
+            c2 = **(vpp+j+1);
             if(c1.data_part.yyyy < c2.data_part.yyyy) continue;
             else if(c1.data_part.yyyy == c2.data_part.yyyy && c1.data_part.mm < c2.data_part.mm) continue;
             else if(c1.data_part.yyyy == c2.data_part.yyyy && c1.data_part.mm == c2.data_part.mm && c1.data_part.dd > c2.data_part.dd){
                 flag=1;
-                temp=cnt[j];
-                cnt[j]=cnt[j+1];
-                cnt[j+1]=temp;
+                temp= vpp[j];
+                vpp[j]=vpp[j+1];
+                vpp[j+1]=temp;
             }else if (c1.data_part.yyyy == c2.data_part.yyyy && c1.data_part.mm == c2.data_part.mm && c1.data_part.dd == c2.data_part.dd){
                 if(c1.orario_part.ora < c2.orario_part.ora) continue;
                 else if(c1.orario_part.ora == c2.orario_part.ora && c1.orario_part.min < c2.orario_part.min) continue;
                 else if(c1.orario_part.ora == c2.orario_part.ora && c1.orario_part.min == c2.orario_part.min && c1.orario_part.sec > c2.orario_part.sec){
-                    flag=1;
-                    temp=cnt[j];
-                    cnt[j]=cnt[j+1];
-                    cnt[j+1]=temp;
+                flag=1;
+                temp= vpp[j];
+                vpp[j]=vpp[j+1];
+                vpp[j+1]=temp;
                 }
             } 
             else{
                 flag=1;
-                temp=cnt[j];
-                cnt[j]=cnt[j+1];
-                cnt[j+1]=temp;
+                temp= vpp[j];
+                vpp[j]=vpp[j+1];
+                vpp[j+1]=temp;
             }
         }
     }
 }
 
-int ric_dic_ricorsiva_cod_tr(corsa v[], int l, int r, char key[]){
+int ric_dic_ricorsiva_cod_tr_p(corsa **p, int l, int r, char key[]){
     int m;
     if(l>r) return -1;
     m=(l+r)/2;
 
-    if(strcmp(key, v[m].cod_tratta) == 0) return m;
-    if(strcmp(key, v[m].cod_tratta) == -1) return ric_dic_ricorsiva_cod_tr(v, l, m-1, key);
+    if(strcmp(key, p[m] -> cod_tratta) == 0) return m;
+    if(strcmp(key, p[m] -> cod_tratta) == -1) return ric_dic_ricorsiva_cod_tr_p(p, l, m-1, key);
 
-    return ric_dic_ricorsiva_cod_tr(v, m+1, r, key);
+    return ric_dic_ricorsiva_cod_tr_p(p, m+1, r, key);
 }
 
-int ric_dic_ricorsiva_stz(corsa v[], int l, int r, char key[]){
+int ric_dic_ricorsiva_stz_p(corsa **p, int l, int r, char key[]){
     int m;
     if(l>r) return -1;
     m=(l+r)/2;
 
-    if(strncmp(key, v[m].staz_part, strlen(key)) == 0) return m;
-    if(strncmp(key, v[m].staz_part, strlen(key)) < 0) return ric_dic_ricorsiva_stz(v, l, m-1, key);
+    if(strncmp(key, p[m] -> staz_part, strlen(key)) == 0) return m;
+    if(strncmp(key, p[m] -> staz_part, strlen(key)) < 0) return ric_dic_ricorsiva_stz_p(p, l, m-1, key);
 
-    return ric_dic_ricorsiva_stz(v, m+1, r, key);
+    return ric_dic_ricorsiva_stz_p(p, m+1, r, key);
+}
+
+void copy_ad(corsa srcp[], corsa **p, int n){
+    for(int i=0; i<n; i++){
+        *(p+i) = srcp+i;
+    }
+    return;
 }
 
 int switch_func(int scelta, int n, corsa cnt[]){
     int l, r, flag;
-    corsa temp;
+    corsa *temp;
+    corsa **vet = (corsa **)malloc(n*(sizeof(corsa*)));
+    corsa c,b;
+    corsa tmp;
+
     switch(scelta){
         case 1:
             char chr;
@@ -165,92 +190,107 @@ int switch_func(int scelta, int n, corsa cnt[]){
             else {if(stampa_tratte(cnt, n, 1) < 0) return -1;}
             break;
         case 2:
-            bubble_sort_opt_data(cnt, n);
-            stampa_tratte(cnt, n, 0);
+            copy_ad(cnt, vet, n);
+
+            bubble_sort_opt_data(vet, n);
+
+            stampa_tratte_p(vet, n);
+            free(vet);
             break;
         case 3:
             l=0, r=n-1, flag = 1;
+            copy_ad(cnt, vet, n);
             
             for(int i=l; i<r && flag==1; i++){
                 flag=0;
                 for(int j=l; j<r-i+l; j++){
-                    if(atoi(cnt[j].cod_tratta+3) > atoi(cnt[j+1].cod_tratta+3)){
+                    c=**(vet+j);
+                    b=**(vet+j+1);
+                    if(atoi(c.cod_tratta+3) > atoi(b.cod_tratta+3)){
                         flag=1;
-                        temp=cnt[j];
-                        cnt[j]=cnt[j+1];
-                        cnt[j+1]=temp;
+                        temp= vet[j];
+                        vet[j]=vet[j+1];
+                        vet[j+1]=temp;
                     }
                 }
             }
-            stampa_tratte(cnt,n,0);
+            stampa_tratte_p(vet,n);
             break;
         case 4:
             l=0, r=n-1, flag = 1;
-            
+            copy_ad(cnt, vet, n);
+
             for(int i=l; i<r && flag==1; i++){
                 flag=0;
                 for(int j=l; j<r-i+l; j++){
-                    if(strcmp(cnt[j].staz_part, cnt[j+1].staz_part) > 0){
+                    c=**(vet+j);
+                    b=**(vet+j+1);
+                    if(strcmp(c.staz_part, b.staz_part) > 0){
                         flag=1;
-                        temp=cnt[j];
-                        cnt[j]=cnt[j+1];
-                        cnt[j+1]=temp;
+                        temp=vet[j];
+                        vet[j]=vet[j+1];
+                        vet[j+1]=temp;
                     }
                 }
             }
-            stampa_tratte(cnt,n,0);
+            stampa_tratte_p(vet,n);
             break;
         case 5:
             l=0, r=n-1, flag = 1;
-            
+            copy_ad(cnt, vet, n);
             for(int i=l; i<r && flag==1; i++){
                 flag=0;
                 for(int j=l; j<r-i+l; j++){
-                    if(strcmp(cnt[j].staz_arr, cnt[j+1].staz_arr) > 0){
+                    c=**(vet+j);
+                    b=**(vet+j+1);
+                    if(strcmp(c.staz_arr, b.staz_arr) > 0){
                         flag=1;
-                        temp=cnt[j];
-                        cnt[j]=cnt[j+1];
-                        cnt[j+1]=temp;
+                        temp=vet[j];
+                        vet[j]=vet[j+1];
+                        vet[j+1]=temp;
                     }
                 }
             }
-            stampa_tratte(cnt,n,0);
+            stampa_tratte_p(vet,n);
             break;
         case 6:
             char cod[MAXC];
-            char c;
+            char ch;
             int in;
             printf("Codice: ");
             scanf("%s", cod);
 
             printf("Ricerca dicotomica (d) o lineare (l)? ");
             getchar();
-            scanf("%c", &c);
+            scanf("%c", &ch);
 
-            
-            if(tolower(c) != 'd' && tolower(c) != 'l') return -1;
-            else if(tolower(c) == 'd'){
+            copy_ad(cnt, vet, n);
+            if(tolower(ch) != 'd' && tolower(ch) != 'l') return -1;
+            else if(tolower(ch) == 'd'){
                 // Ordino il vettore per poter effettuare la ricerca dicotomica
                 l=0, r=n-1, flag = 1;
                 for(int i=l; i<r && flag==1; i++){
                     flag=0;
                     for(int j=l; j<r-i+l; j++){
-                        if(atoi(cnt[j].cod_tratta+3) > atoi(cnt[j+1].cod_tratta+3)){
+                        c=**(vet+j);
+                        b=**(vet+j+1);
+                        if(atoi(c.cod_tratta+3) > atoi(b.cod_tratta+3)){
                             flag=1;
-                            temp=cnt[j];
-                            cnt[j]=cnt[j+1];
-                            cnt[j+1]=temp;
+                            temp=vet[j];
+                            vet[j]=vet[j+1];
+                            vet[j+1]=temp;
                         }
                     }
                 }
-                in = ric_dic_ricorsiva_cod_tr(cnt, 0, n, cod);
-                while(strcmp(cnt[in-1].cod_tratta, cod) == 0 && in>0) in--;
-                stampa_tratta(cnt[in]);
-
+                in = ric_dic_ricorsiva_cod_tr_p(vet, 0, n, cod);
+                corsa co = *vet[in-1];
+                while(strcmp(co.cod_tratta, cod) == 0 && in>0) in--;
+                stampa_tratta_p(*(vet+in));
+                free(vet);
             }else{
                 for(int i=0; i<n; i++){
                     if(strcmp(cnt[i].cod_tratta, cod) == 0){
-                        stampa_tratta(cnt[i]);
+                        stampa_tratta_p(cnt+i);
                         break;
                     }
                 }
@@ -266,35 +306,39 @@ int switch_func(int scelta, int n, corsa cnt[]){
             printf("Ricerca dicotomica (d) o lineare (l)? ");
             getchar();
             scanf("%c", &scl);
+            copy_ad(cnt, vet, n);
             if(tolower(scl) != 'd' && tolower(scl) != 'l') return -1;
             else if(tolower(scl) == 'd'){
                 l=0, r=n-1, flag = 1;                
                 for(int i=l; i<r && flag==1; i++){
                     flag=0;
                     for(int j=l; j<r-i+l; j++){
-                        if(strcmp(cnt[j].staz_part, cnt[j+1].staz_part) > 0){
+                        c=**(vet+j);
+                        b=**(vet+j+1);
+                        if(strcmp(c.staz_part, b.staz_part) > 0){
                             flag=1;
-                            temp=cnt[j];
-                            cnt[j]=cnt[j+1];
-                            cnt[j+1]=temp;
+                            temp=vet[j];
+                            vet[j]=vet[j+1];
+                            vet[j+1]=temp;
                         }
                     }
                 }
                 
-                if((index = ric_dic_ricorsiva_stz(cnt, 0, n, stz)) <0) return -1;
+                if((index = ric_dic_ricorsiva_stz_p(vet, 0, n, stz)) <0) return -1;
 
-                while(index>0 && strcmp(cnt[index].staz_part, cnt[index-1].staz_part) == 0)  { 
+                while(index>0 && strncmp(stz, vet[index-1] -> staz_part, strlen(stz)) == 0)  { 
                     index--;  
                 }
-                while(index<n && strcmp(cnt[index].staz_part, cnt[index+1].staz_part) == 0) {
-                    stampa_tratta(cnt[index]);
+                while(index<n && strncmp(vet[index]->staz_part, stz, strlen(stz)) == 0) {
+                    stampa_tratta_p(vet[index]);
                     index++;
                 }
-                stampa_tratta(cnt[index]);
+                
+                free(vet);
             }else{
                 flag=0;
                 for(int m=0; m<n; m++){
-                    if(strncmp(stz, cnt[m].staz_part, strlen(stz)) == 0) stampa_tratta(cnt[m]), flag=1;
+                    if(strncmp(stz, cnt[m].staz_part, strlen(stz)) == 0) stampa_tratta_p(cnt+m), flag=1;
                 }
                 if(!flag) return -1;
             }
