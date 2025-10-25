@@ -176,7 +176,6 @@ int switch_func(int scelta, int n, corsa cnt[]){
     int l, r, flag;
     corsa *temp;
     corsa **vet = (corsa **)malloc(n*(sizeof(corsa*)));
-    corsa c,b;
     corsa tmp;
 
     switch(scelta){
@@ -186,8 +185,8 @@ int switch_func(int scelta, int n, corsa cnt[]){
             getchar();
             scanf("%c", &chr);
 
-            if(tolower(chr)=='v') {if(stampa_tratte(cnt, n, 0) < 0) return -1;}
-            else {if(stampa_tratte(cnt, n, 1) < 0) return -1;}
+            if(tolower(chr)=='v') {if(stampa_tratte(cnt, n, 0) < 0) {free(vet); return -1;}}
+            else {if(stampa_tratte(cnt, n, 1) < 0) {free(vet); return -1;}}
             break;
         case 2:
             copy_ad(cnt, vet, n);
@@ -195,7 +194,6 @@ int switch_func(int scelta, int n, corsa cnt[]){
             bubble_sort_opt_data(vet, n);
 
             stampa_tratte_p(vet, n);
-            free(vet);
             break;
         case 3:
             l=0, r=n-1, flag = 1;
@@ -204,9 +202,7 @@ int switch_func(int scelta, int n, corsa cnt[]){
             for(int i=l; i<r && flag==1; i++){
                 flag=0;
                 for(int j=l; j<r-i+l; j++){
-                    c=**(vet+j);
-                    b=**(vet+j+1);
-                    if(atoi(c.cod_tratta+3) > atoi(b.cod_tratta+3)){
+                    if(atoi(vet[j] -> cod_tratta+3) > atoi(vet[j+1] -> cod_tratta+3)){
                         flag=1;
                         temp= vet[j];
                         vet[j]=vet[j+1];
@@ -223,9 +219,7 @@ int switch_func(int scelta, int n, corsa cnt[]){
             for(int i=l; i<r && flag==1; i++){
                 flag=0;
                 for(int j=l; j<r-i+l; j++){
-                    c=**(vet+j);
-                    b=**(vet+j+1);
-                    if(strcmp(c.staz_part, b.staz_part) > 0){
+                    if(strcmp(vet[j] -> staz_part, vet[j+1] -> staz_part) > 0){
                         flag=1;
                         temp=vet[j];
                         vet[j]=vet[j+1];
@@ -241,9 +235,7 @@ int switch_func(int scelta, int n, corsa cnt[]){
             for(int i=l; i<r && flag==1; i++){
                 flag=0;
                 for(int j=l; j<r-i+l; j++){
-                    c=**(vet+j);
-                    b=**(vet+j+1);
-                    if(strcmp(c.staz_arr, b.staz_arr) > 0){
+                    if(strcmp(vet[j] -> staz_arr, vet[j+1] -> staz_arr) > 0){
                         flag=1;
                         temp=vet[j];
                         vet[j]=vet[j+1];
@@ -265,16 +257,14 @@ int switch_func(int scelta, int n, corsa cnt[]){
             scanf("%c", &ch);
 
             copy_ad(cnt, vet, n);
-            if(tolower(ch) != 'd' && tolower(ch) != 'l') return -1;
+            if(tolower(ch) != 'd' && tolower(ch) != 'l') {free(vet); return -1;}
             else if(tolower(ch) == 'd'){
                 // Ordino il vettore per poter effettuare la ricerca dicotomica
                 l=0, r=n-1, flag = 1;
                 for(int i=l; i<r && flag==1; i++){
                     flag=0;
                     for(int j=l; j<r-i+l; j++){
-                        c=**(vet+j);
-                        b=**(vet+j+1);
-                        if(atoi(c.cod_tratta+3) > atoi(b.cod_tratta+3)){
+                        if(atoi(vet[j] -> cod_tratta+3) > atoi(vet[j+1] -> cod_tratta+3)){
                             flag=1;
                             temp=vet[j];
                             vet[j]=vet[j+1];
@@ -283,10 +273,9 @@ int switch_func(int scelta, int n, corsa cnt[]){
                     }
                 }
                 in = ric_dic_ricorsiva_cod_tr_p(vet, 0, n, cod);
-                corsa co = *vet[in-1];
-                while(strcmp(co.cod_tratta, cod) == 0 && in>0) in--;
+                while(strncmp(vet[in] -> cod_tratta, cod, strlen(cod)) == 0 && in>0) in--;
                 stampa_tratta_p(*(vet+in));
-                free(vet);
+
             }else{
                 for(int i=0; i<n; i++){
                     if(strcmp(cnt[i].cod_tratta, cod) == 0){
@@ -307,15 +296,13 @@ int switch_func(int scelta, int n, corsa cnt[]){
             getchar();
             scanf("%c", &scl);
             copy_ad(cnt, vet, n);
-            if(tolower(scl) != 'd' && tolower(scl) != 'l') return -1;
+            if(tolower(scl) != 'd' && tolower(scl) != 'l') {free(vet); return -1;}
             else if(tolower(scl) == 'd'){
                 l=0, r=n-1, flag = 1;                
                 for(int i=l; i<r && flag==1; i++){
                     flag=0;
                     for(int j=l; j<r-i+l; j++){
-                        c=**(vet+j);
-                        b=**(vet+j+1);
-                        if(strcmp(c.staz_part, b.staz_part) > 0){
+                        if(strcmp(vet[j] -> staz_part, vet[j+1] -> staz_part) > 0){
                             flag=1;
                             temp=vet[j];
                             vet[j]=vet[j+1];
@@ -324,7 +311,7 @@ int switch_func(int scelta, int n, corsa cnt[]){
                     }
                 }
                 
-                if((index = ric_dic_ricorsiva_stz_p(vet, 0, n, stz)) <0) return -1;
+                if((index = ric_dic_ricorsiva_stz_p(vet, 0, n, stz)) <0) {free(vet); return -1;}
 
                 while(index>0 && strncmp(stz, vet[index-1] -> staz_part, strlen(stz)) == 0)  { 
                     index--;  
@@ -334,16 +321,17 @@ int switch_func(int scelta, int n, corsa cnt[]){
                     index++;
                 }
                 
-                free(vet);
+
             }else{
                 flag=0;
                 for(int m=0; m<n; m++){
                     if(strncmp(stz, cnt[m].staz_part, strlen(stz)) == 0) stampa_tratta_p(cnt+m), flag=1;
                 }
-                if(!flag) return -1;
+                if(!flag) {free(vet); return -1;}
             }
             break;
     }
+    free(vet);
     return 0;
 }
 
