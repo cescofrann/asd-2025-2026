@@ -8,7 +8,7 @@ void stampa_vet(int *vet, int n);
 
 int main(){
     FILE *fp_read;
-    int nr, nc, n1, n2, **pn1, **pn2;
+    int nr, nc, n1, n2;
     int *v1, *v2;
 
     if((fp_read = fopen("mat.txt", "r")) == NULL){
